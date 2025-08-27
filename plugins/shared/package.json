@@ -1,0 +1,13 @@
+{
+  "name": "@dantraynor/shared",
+  "version": "0.0.1",
+  "description": "Shared utilities for Luna plugins (internal).",
+  "author": {
+    "name": "dantraynor",
+    "url": "https://github.com/dantraynor/lunaplugins",
+    "avatarUrl": "https://avatars.githubusercontent.com/u/198297846?s=80&v=4"
+  },
+  "main": "./playlistMembershipUtils.ts",
+  "type": "module",
+  "private": true
+}

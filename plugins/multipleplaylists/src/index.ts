@@ -16,6 +16,8 @@ trace.msg.log(`MultiplePlaylists plugin loaded for ${redux.store.getState().user
  * - Set to true to disable badges (default)
  */
 const DISABLE_MEMBERSHIP_BADGES = true;
+// Split plan: keep this plugin modal-only. Row observer will live in the new playlistmembership plugin.
+const ENABLE_ROW_OBSERVER = false;
 
 // plugin settings
 export { Settings } from "./Settings";
@@ -717,9 +719,12 @@ function showNotification(message: string, type: 'success' | 'warning' | 'error'
 function init() {
     // Add context menu integration
     setupContextMenuIntegration();
-    // Start playlist membership observer
-    initPlaylistMembershipObserver();
-    startRowScan();
+
+    // Modal-only: do not run global row observer/scan in this plugin anymore
+    if (ENABLE_ROW_OBSERVER) {
+      initPlaylistMembershipObserver();
+      startRowScan();
+    }
 
     // Remove any previously rendered badges or debug markers when disabled
     if (DISABLE_MEMBERSHIP_BADGES) {
