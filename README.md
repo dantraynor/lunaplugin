@@ -11,6 +11,12 @@ Add songs to multiple playlists at once, making playlist management more efficie
 
 <img width="490" height="505" alt="Screenshot 2025-07-10 at 20 37 14" src="https://github.com/user-attachments/assets/29510a17-7dd4-47b5-ab68-ceee0f08d91a" />
 
+###  In Playlists
+Indicates if a song is in a playlist via Multiple Playlists.
+
+<img width="545" height="546" alt="In Playlists" src="https://github.com/user-attachments/assets/50283607-222d-4702-93bc-83c6489cc7e5" />
+
+
 
 
 ## Installation
