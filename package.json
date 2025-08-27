@@ -4,8 +4,8 @@
 	"type": "module",
 	"scripts": {
 		"watch": "concurrently \"pnpm:build:dev --watch\" pnpm:serve",
-		"build": "rimraf ./dist && tsx esbuild.config.ts && node -e \"const fs=require('fs');const rootPkg=JSON.parse(fs.readFileSync('./package.json'));const store={name:rootPkg.name,description:rootPkg.description,plugins:['dantraynor.multiplaylists.mjs','dantraynor.membership.mjs']};fs.writeFileSync('./dist/store.json',JSON.stringify(store));\"",
-		"build:dev": "rimraf ./dist && tsx esbuild.config.ts && node -e \"const fs=require('fs');const rootPkg=JSON.parse(fs.readFileSync('./package.json'));const store={name:rootPkg.name,description:rootPkg.description,plugins:['dantraynor.multiplaylists.mjs','dantraynor.membership.mjs']};fs.writeFileSync('./dist/store.json',JSON.stringify(store));\"",
+		"build": "rimraf ./dist && tsx esbuild.config.ts && node -e \"const fs=require('fs');const rootPkg=JSON.parse(fs.readFileSync('./package.json'));const store={name:rootPkg.name,description:rootPkg.description,plugins:['dantraynor.multiplaylists.mjs','dantraynor.inplaylists.mjs']};fs.writeFileSync('./dist/store.json',JSON.stringify(store));\"",
+		"build:dev": "rimraf ./dist && tsx esbuild.config.ts && node -e \"const fs=require('fs');const rootPkg=JSON.parse(fs.readFileSync('./package.json'));const store={name:rootPkg.name,description:rootPkg.description,plugins:['dantraynor.multiplaylists.mjs','dantraynor.inplaylists.mjs']};fs.writeFileSync('./dist/store.json',JSON.stringify(store));\"",
 		"build:prod": "pnpm build",
 		"test:prod": "pnpm build && pnpm serve",
 		"serve": "http-server ./dist -p 3000 -s --cors -c-1"
