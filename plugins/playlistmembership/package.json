@@ -1,12 +1,12 @@
 {
-  "name": "@dantraynor/playlistmembership",
-  "version": "0.1.0",
-  "description": "Show playlist membership indicators on track rows (attributes, tooltips, optional badges).",
-  "author": {
-    "name": "dantraynor",
-    "url": "https://github.com/dantraynor/lunaplugins",
-    "avatarUrl": "https://avatars.githubusercontent.com/u/198297846?s=80&v=4"
-  },
-  "main": "./src/index.ts",
-  "type": "module"
+	"name": "@dantraynor/membership",
+	"version": "0.1.1",
+	"description": "Show playlist membership on track rows (attributes, tooltips, optional badges).",
+	"author": {
+		"name": "dantraynor",
+		"url": "https://github.com/dantraynor/lunaplugins",
+		"avatarUrl": "https://avatars.githubusercontent.com/u/198297846?s=80&v=4"
+	},
+	"main": "./src/index.ts",
+	"type": "module"
 }
