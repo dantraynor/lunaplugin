@@ -1,0 +1,25 @@
+{
+	"name": "@dantraynor/lunaplugins",
+	"description": "Collection of Luna plugins by dantraynor",
+	"type": "module",
+	"scripts": {
+		"watch": "concurrently \"pnpm:build:dev --watch\" pnpm:serve",
+		"build": "rimraf ./dist && tsx esbuild.config.ts && node -e \"const fs=require('fs');const rootPkg=JSON.parse(fs.readFileSync('./package.json'));fs.writeFileSync('./dist/store.json',JSON.stringify({name:rootPkg.name,description:rootPkg.description,plugins:['dantraynor.multiplaylists.mjs']}));\"",
+		"build:dev": "rimraf ./dist && tsx esbuild.config.ts && node -e \"const fs=require('fs');const pkg=JSON.parse(fs.readFileSync('./plugins/multipleplaylists/package.json'));fs.writeFileSync('./dist/store.json',JSON.stringify({name:pkg.name,description:pkg.description,author:pkg.author,version:pkg.version,plugins:['dantraynor.multiplaylists.mjs']}));\"",
+		"build:prod": "pnpm build",
+		"test:prod": "pnpm build && pnpm serve",
+		"serve": "http-server ./dist -p 3000 -s --cors -c-1"
+	},
+	"devDependencies": {
+		"@types/node": "^22.15.29",
+		"@types/react": "^19.1.6",
+		"@types/react-dom": "^19.1.5",
+		"concurrently": "^9.1.2",
+		"http-server": "^14.1.1",
+		"luna": "github:Inrixia/TidaLuna#81369c7",
+		"oby": "^15.1.2",
+		"rimraf": "^6.0.1",
+		"tsx": "^4.19.4",
+		"typescript": "^5.8.3"
+	}
+}

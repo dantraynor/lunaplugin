@@ -1,0 +1,12 @@
+{
+	"name": "@dantraynor/multiplaylists",
+	"version": "1.0.1",
+	"description": "Add songs to multiple playlists with a simple right-click.",
+	"author": {
+		"name": "dantraynor",
+		"url": "https://github.com/dantraynor/lunaplugins",
+		"avatarUrl": "https://avatars.githubusercontent.com/u/198297846?s=80&v=4"
+	},
+	"main": "./src/index.ts",
+	"type": "module"
+}
