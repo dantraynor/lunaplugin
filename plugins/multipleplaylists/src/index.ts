@@ -63,7 +63,7 @@ async function showPlaylistSelector(song: MediaItem) {
             }
         }
     } catch (error) {
-        trace.err("Error getting artist information:", error);
+        // swallow artist info errors silently
         songArtist = 'Unknown Artist';
     }
 
@@ -161,14 +161,13 @@ function populatePlaylistList() {
                 </label>
             `).join('');
     } catch (error) {
-        trace.err("Error loading playlists:", error);
+        // swallow playlist load errors silently
         playlistContainer.innerHTML = '<p style="color: #ff6b6b;">Error loading playlists</p>';
     }
 }
 
-// Function to add song to selected playlists
+// Function to add song to selected playlists from the modal, and persist selection
 async function addToSelectedPlaylists(song: MediaItem) {
-
     const checkboxes = document.querySelectorAll('#playlist-list input[type="checkbox"]:checked');
     const selectedPlaylistIds = Array.from(checkboxes).map((cb: any) => cb.dataset.playlistId);
 
@@ -185,7 +184,6 @@ async function addToSelectedPlaylists(song: MediaItem) {
         // Add to each selected playlist
         for (const playlistId of selectedPlaylistIds) {
             try {
-                // Use the correct Redux action for adding items to playlist
                 redux.store.dispatch({
                     type: 'content/ADD_MEDIA_ITEMS_TO_PLAYLIST',
                     payload: {
@@ -196,67 +194,30 @@ async function addToSelectedPlaylists(song: MediaItem) {
                 });
                 successCount++;
             } catch (error) {
-                trace.err(`Error adding to playlist ${playlistId}:`, error);
+                // ignore per-playlist errors; we'll reflect in the count
                 errorCount++;
             }
         }
 
-        // Show result notification
+        // Show result notification (console only, no UI toast)
         const message = errorCount === 0 
             ? `"${songTitle}" added to ${successCount} playlist${successCount > 1 ? 's' : ''}`
             : `"${songTitle}" added to ${successCount} playlist${successCount > 1 ? 's' : ''} (${errorCount} failed)`;
-        
         showNotification(message, errorCount === 0 ? 'success' : 'warning');
 
     } catch (error) {
-        trace.err("Error adding song to playlists:", error);
+        // ignore outer add errors but surface a generic message
         showNotification('Error adding song to playlists', 'error');
     }
 }
 
 // Function to show notification
-function showNotification(message: string, type: 'success' | 'warning' | 'error') {
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 12px 16px;
-        border-radius: 6px;
-        color: white;
-        font-weight: 500;
-        z-index: 10001;
-        max-width: 300px;
-        word-wrap: break-word;
-        background: ${type === 'success' ? '#4caf50' : type === 'warning' ? '#ff9800' : '#f44336'};
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        transform: translateX(400px);
-        transition: transform 0.3s ease;
-    `;
-    notification.textContent = message;
-
-    document.body.appendChild(notification);
-
-    // Animate in
-    setTimeout(() => {
-        notification.style.transform = 'translateX(0)';
-    }, 100);
-
-    // Auto remove after 4 seconds
-    setTimeout(() => {
-        notification.style.transform = 'translateX(400px)';
-        setTimeout(() => {
-            if (notification.parentNode) {
-                document.body.removeChild(notification);
-            }
-        }, 300);
-    }, 4000);
+function showNotification(_message: string, _type: 'success' | 'warning' | 'error') {
+    // No-op: intentionally suppress all pop-up/console notifications
 }
 
 // Initialize plugin
 function init() {
-    trace.msg.log("Playlist Batch Add plugin initializing...");
-    
     // Add context menu integration
     setupContextMenuIntegration();
 }
@@ -279,17 +240,15 @@ function setupContextMenuIntegration() {
             if (contextMenuSongId) {
                 // Get the actual MediaItem instance for the right-clicked song
                 try {
-                    trace.msg.log(`Loading MediaItem for context menu song: ${contextMenuSongId}`);
                     const mediaItem = await MediaItem.fromId(contextMenuSongId, contextMenuContentType);
                     if (mediaItem) {
                         const title = await mediaItem.title();
-                        trace.msg.log(`Loaded MediaItem: ${title}`);
                         await showPlaylistSelector(mediaItem);
                     } else {
                         showNotification('Could not load song information', 'error');
                     }
                 } catch (error) {
-                    trace.err("Error loading MediaItem from context menu:", error);
+                    // swallow media item load errors
                     showNotification('Error loading song information', 'error');
                 }
             } else {
@@ -301,43 +260,36 @@ function setupContextMenuIntegration() {
     // Only show the button for media item context menus and capture the song ID
     ContextMenu.onMediaItem(unloads, async ({ mediaCollection, contextMenu }) => {
         // Store the song ID from the context menu for later use
-        try {
-            trace.msg.log("Context menu opened on media item, extracting song info...");
+    try {
             // Handle different types of media collections
             if (mediaCollection && typeof mediaCollection === 'object') {
                 // For MediaItems collections, get the first MediaItem
                 if ('mediaItems' in mediaCollection && typeof mediaCollection.mediaItems === 'function') {
-                    // This is an Album or Playlist
-                    trace.msg.log("Media collection is Album or Playlist");
+            // This is an Album or Playlist
                     const mediaItemsGenerator = await mediaCollection.mediaItems();
                     for await (const mediaItem of mediaItemsGenerator) {
                         contextMenuSongId = mediaItem.id;
                         contextMenuContentType = mediaItem.contentType;
-                        trace.msg.log(`Captured song ID from collection: ${contextMenuSongId}`);
                         break; // We only need the first one
                     }
                 } else {
-                    // This might be MediaItems collection - try to iterate directly
-                    trace.msg.log("Media collection is MediaItems");
+            // This might be MediaItems collection - try to iterate directly
                     for await (const mediaItem of mediaCollection as any) {
                         contextMenuSongId = mediaItem.id;
                         contextMenuContentType = mediaItem.contentType;
-                        trace.msg.log(`Captured song ID directly: ${contextMenuSongId}`);
                         break; // We only need the first one
                     }
                 }
             }
         } catch (error) {
-            trace.err("Error getting MediaItem from context menu:", error);
+        // swallow context menu extraction errors
             contextMenuSongId = null;
         }
         
         // Show our button in the context menu
-        await contextMenuButton.show(contextMenu);
+    await contextMenuButton.show(contextMenu);
     });
 }
 
 // Start the plugin
 init();
-
-trace.msg.log("Multiple Playlists plugin loaded successfully!");
