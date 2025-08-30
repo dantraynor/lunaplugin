@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "../../../../Desktop/luna/plugtemplate"
+		},
+		{
+			"name": "lunaplugins-2",
+			"path": "../../.."
+		}
+	],
+	"settings": {}
+}

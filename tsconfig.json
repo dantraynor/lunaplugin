@@ -1,3 +1,15 @@
 {
-	"extends": "luna/tsconfig.json"
+	"compilerOptions": {
+		"target": "ES2020",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"jsx": "react-jsx",
+		"lib": ["ES2020", "DOM", "DOM.Iterable", "ESNext.AsyncIterable"],
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"strict": true,
+		"noEmit": true,
+		"baseUrl": "."
+	},
+	"include": ["plugins/**/*", "types/**/*"]
 }

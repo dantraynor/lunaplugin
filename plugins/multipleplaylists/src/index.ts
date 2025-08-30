@@ -2,16 +2,25 @@ import { LunaUnload, Tracer } from "@luna/core";
 import { MediaItem, redux, ContextMenu } from "@luna/lib";
 
 export const { trace, errSignal } = Tracer("[MultiplePlaylists]");
+errSignal!._ = "MultiplePlaylists plugin error signal";
 
-// plugin settings
+trace.msg.log(`Hello ${redux.store.getState().user.meta.profileName} from the MultiplePlaylists plugin!`);
+
 export { Settings } from "./Settings.js";
 
-// Functions in unloads are called when plugin is unloaded.
 export const unloads = new Set<LunaUnload>();
 
-// Function to show playlist selector modal
-async function showPlaylistSelector(song: MediaItem) {
+// Example: Log to console whenever changing page
+redux.intercept("page/SET_PAGE_ID", unloads, console.log);
 
+// Example: Alert on media transition
+MediaItem.onMediaTransition(unloads, async (mediaItem: any) => {
+    const title = await mediaItem.title();
+    trace.msg.log(`Media item transitioned: ${title}`);
+});
+
+// Function to show playlist selector modal (complete implementation)
+async function showPlaylistSelector(song: any) {
     // Create modal overlay
     const overlay = document.createElement('div');
     overlay.style.cssText = `
@@ -44,25 +53,24 @@ async function showPlaylistSelector(song: MediaItem) {
     // Get song details
     const songTitle = song.title ? await song.title() : 'Unknown Song';
     let songArtist = 'Unknown Artist';
-    
+
     // Try to get artist information
     try {
-        if (song.artist) {
-            const artist = await song.artist();
+        if ((song as any).artist) {
+            const artist = await (song as any).artist();
             if (artist && artist.name) {
                 songArtist = artist.name;
             }
-        } else if (song.artists) {
-            const artists = await song.artists();
+        } else if ((song as any).artists) {
+            const artists = await (song as any).artists();
             if (artists && artists.length > 0) {
-                // Get the first artist
                 const firstArtist = await artists[0];
                 if (firstArtist && firstArtist.name) {
                     songArtist = firstArtist.name;
                 }
             }
         }
-    } catch (error) {
+    } catch (_error) {
         // swallow artist info errors silently
         songArtist = 'Unknown Artist';
     }
@@ -110,7 +118,7 @@ async function showPlaylistSelector(song: MediaItem) {
     });
 
     addBtn?.addEventListener('click', () => {
-        addToSelectedPlaylists(song);
+        void addToSelectedPlaylists(song);
         document.body.removeChild(overlay);
     });
 
@@ -167,7 +175,7 @@ function populatePlaylistList() {
 }
 
 // Function to add song to selected playlists from the modal, and persist selection
-async function addToSelectedPlaylists(song: MediaItem) {
+async function addToSelectedPlaylists(song: any) {
     const checkboxes = document.querySelectorAll('#playlist-list input[type="checkbox"]:checked');
     const selectedPlaylistIds = Array.from(checkboxes).map((cb: any) => cb.dataset.playlistId);
 
@@ -228,8 +236,8 @@ function setupContextMenuIntegration() {
     contextMenuButton.text = "Add to Multiple Playlists";
     
     // Store the context menu song ID for use in onClick
-    let contextMenuSongId: redux.ItemId | null = null;
-    let contextMenuContentType: redux.ContentType = "track";
+    let contextMenuSongId: any = null;
+    let contextMenuContentType: any = "track";
     
     contextMenuButton.onClick(async () => {
         // Close the context menu first
@@ -258,7 +266,7 @@ function setupContextMenuIntegration() {
     });
     
     // Only show the button for media item context menus and capture the song ID
-    ContextMenu.onMediaItem(unloads, async ({ mediaCollection, contextMenu }) => {
+    ContextMenu.onMediaItem(unloads, async ({ mediaCollection, contextMenu }: any) => {
         // Store the song ID from the context menu for later use
     try {
             // Handle different types of media collections
