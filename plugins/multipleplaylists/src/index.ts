@@ -1,8 +1,7 @@
 import { LunaUnload, Tracer } from "@luna/core";
 import { MediaItem, redux, ContextMenu } from "@luna/lib";
 
-export const { trace, errSignal } = Tracer("[MultiplePlaylists]");
-errSignal!._ = "MultiplePlaylists plugin error signal";
+export const { trace } = Tracer("[MultiplePlaylists]");
 
 trace.msg.log(`Hello ${redux.store.getState().user.meta.profileName} from the MultiplePlaylists plugin!`);
 
