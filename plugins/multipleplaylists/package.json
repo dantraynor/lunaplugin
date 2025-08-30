@@ -1,0 +1,11 @@
+{
+	"name": "@dantraynor/multipleplaylists",
+	"description": "Right-click on any song to see the \"Add to Multiple Playlists\" option.",
+	"author": {
+		"name": "dantraynor",
+		"url": "https://github.com/dantraynor/lunaplugins",
+		"avatarUrl": "https://avatars.githubusercontent.com/u/198297846?v=4"
+	},
+	"main": "./src/index.ts",
+	"type": "module"
+}
