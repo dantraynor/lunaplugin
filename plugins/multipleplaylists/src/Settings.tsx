@@ -1,17 +1,13 @@
 
 import React from "react";
-import { LunaSettings, LunaSwitchSetting } from "@luna/ui";
-import { trace } from "./index.js";
+import { LunaSettings } from "@luna/ui";
 
 export const Settings = () => {
-	const [checked, setChecked] = React.useState(false);
-	const onChange = React.useCallback((_: any, checked?: boolean) => {
-		trace.msg.log(`MultiplePlaylists switch is now ${checked ? "on" : "off"}`);
-		setChecked(checked ?? false);
-	}, []);
 	return (
 		<LunaSettings>
-			<LunaSwitchSetting title="Enable Multiple Playlists" checked={checked} desc="Toggle the multiple playlists feature" onChange={onChange} />
+			<div style={{ padding: "16px", textAlign: "center", opacity: 0.7 }}>
+				Multiple Playlists plugin is active. Right-click any song to add it to multiple playlists.
+			</div>
 		</LunaSettings>
 	);
 };
