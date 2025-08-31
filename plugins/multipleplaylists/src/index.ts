@@ -3,8 +3,11 @@ import { MediaItem, redux, ContextMenu } from "@luna/lib";
 
 export const { trace, errSignal } = Tracer("[MultiplePlaylists]");
 
+// Set error signal for proper error handling
+errSignal!._ = "Multiple Playlists plugin error signal";
+
 // plugin settings
-export { Settings } from "./Settings.js";
+export { Settings } from "./Settings";
 
 // Functions in unloads are called when plugin is unloaded.
 export const unloads = new Set<LunaUnload>();
@@ -63,7 +66,8 @@ async function showPlaylistSelector(song: MediaItem) {
             }
         }
     } catch (error) {
-        // swallow artist info errors silently
+        // Log artist info errors but don't fail the operation
+        trace.warn.log("Could not get artist information:", error);
         songArtist = 'Unknown Artist';
     }
 
@@ -121,6 +125,14 @@ async function showPlaylistSelector(song: MediaItem) {
     });
 }
 
+// Type definition for playlist object structure
+interface PlaylistObject {
+    uuid: string;
+    title?: string;
+    numberOfTracks?: number;
+    type: string;
+}
+
 // Function to populate the playlist list
 function populatePlaylistList() {
     const playlistContainer = document.querySelector('#playlist-list');
@@ -136,12 +148,12 @@ function populatePlaylistList() {
             return;
         }
 
-        const playlistsArray = Object.values(playlists).filter((playlist: any) => 
+        const playlistsArray = Object.values(playlists).filter((playlist: PlaylistObject) => 
             playlist && playlist.type === 'USER'
         );
         
         playlistContainer.innerHTML = playlistsArray
-            .map((playlist: any) => `
+            .map((playlist: PlaylistObject) => `
                 <label style="
                     display: flex;
                     align-items: center;
@@ -161,7 +173,8 @@ function populatePlaylistList() {
                 </label>
             `).join('');
     } catch (error) {
-        // swallow playlist load errors silently
+        // Log playlist load errors for debugging
+        trace.warn.log("Error loading playlists:", error);
         playlistContainer.innerHTML = '<p style="color: #ff6b6b;">Error loading playlists</p>';
     }
 }
@@ -169,7 +182,7 @@ function populatePlaylistList() {
 // Function to add song to selected playlists from the modal, and persist selection
 async function addToSelectedPlaylists(song: MediaItem) {
     const checkboxes = document.querySelectorAll('#playlist-list input[type="checkbox"]:checked');
-    const selectedPlaylistIds = Array.from(checkboxes).map((cb: any) => cb.dataset.playlistId);
+    const selectedPlaylistIds = Array.from(checkboxes).map((cb: HTMLInputElement) => cb.dataset.playlistId).filter(Boolean);
 
     if (selectedPlaylistIds.length === 0) {
         showNotification('Please select at least one playlist', 'error');
@@ -194,7 +207,8 @@ async function addToSelectedPlaylists(song: MediaItem) {
                 });
                 successCount++;
             } catch (error) {
-                // ignore per-playlist errors; we'll reflect in the count
+                // Log per-playlist errors but continue with others
+                trace.warn.log(`Error adding to playlist ${playlistId}:`, error);
                 errorCount++;
             }
         }
@@ -206,18 +220,33 @@ async function addToSelectedPlaylists(song: MediaItem) {
         showNotification(message, errorCount === 0 ? 'success' : 'warning');
 
     } catch (error) {
-        // ignore outer add errors but surface a generic message
+        // Log outer add errors
+        trace.err.log("Error adding song to playlists:", error);
         showNotification('Error adding song to playlists', 'error');
     }
 }
 
 // Function to show notification
-function showNotification(_message: string, _type: 'success' | 'warning' | 'error') {
-    // No-op: intentionally suppress all pop-up/console notifications
+function showNotification(message: string, type: 'success' | 'warning' | 'error') {
+    // Log to console with appropriate level based on type
+    switch (type) {
+        case 'success':
+            trace.msg.log(message);
+            break;
+        case 'warning':
+            trace.warn.log(message);
+            break;
+        case 'error':
+            trace.err.log(message);
+            break;
+    }
 }
 
 // Initialize plugin
 function init() {
+    // Log plugin initialization
+    trace.msg.log("Multiple Playlists plugin initialized");
+    
     // Add context menu integration
     setupContextMenuIntegration();
 }
@@ -233,7 +262,7 @@ function setupContextMenuIntegration() {
     
     contextMenuButton.onClick(async () => {
         // Close the context menu first
-        redux.actions["contextMenu/CLOSE"]();
+        redux.store.dispatch({ type: "contextMenu/CLOSE" });
         
         // Small delay to ensure context menu is closed
         setTimeout(async () => {
@@ -248,7 +277,8 @@ function setupContextMenuIntegration() {
                         showNotification('Could not load song information', 'error');
                     }
                 } catch (error) {
-                    // swallow media item load errors
+                    // Log media item load errors
+                    trace.warn.log("Error loading song information:", error);
                     showNotification('Error loading song information', 'error');
                 }
             } else {
@@ -265,7 +295,7 @@ function setupContextMenuIntegration() {
             if (mediaCollection && typeof mediaCollection === 'object') {
                 // For MediaItems collections, get the first MediaItem
                 if ('mediaItems' in mediaCollection && typeof mediaCollection.mediaItems === 'function') {
-            // This is an Album or Playlist
+                    // This is an Album or Playlist
                     const mediaItemsGenerator = await mediaCollection.mediaItems();
                     for await (const mediaItem of mediaItemsGenerator) {
                         contextMenuSongId = mediaItem.id;
@@ -273,8 +303,8 @@ function setupContextMenuIntegration() {
                         break; // We only need the first one
                     }
                 } else {
-            // This might be MediaItems collection - try to iterate directly
-                    for await (const mediaItem of mediaCollection as any) {
+                    // This might be MediaItems collection - try to iterate directly
+                    for await (const mediaItem of mediaCollection as Iterable<MediaItem>) {
                         contextMenuSongId = mediaItem.id;
                         contextMenuContentType = mediaItem.contentType;
                         break; // We only need the first one
@@ -282,7 +312,8 @@ function setupContextMenuIntegration() {
                 }
             }
         } catch (error) {
-        // swallow context menu extraction errors
+            // Log context menu extraction errors
+            trace.warn.log("Error extracting media item from context menu:", error);
             contextMenuSongId = null;
         }
         

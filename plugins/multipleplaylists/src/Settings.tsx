@@ -2,5 +2,9 @@ import React from "react";
 import { LunaSettings } from "@luna/ui";
 
 export const Settings = () => {
-	return null;
+	return (
+		<LunaSettings>
+			{/* Multiple Playlists plugin currently has no configurable settings */}
+		</LunaSettings>
+	);
 };
