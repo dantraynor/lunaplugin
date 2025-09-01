@@ -415,16 +415,19 @@ async function addToSelectedPlaylists(song: MediaItem) {
             }
         }
 
-        // Show result notification (console only, no UI toast)
-        let message = '';
-        if (errorCount === 0 && skippedCount === 0) {
-            message = `"${songTitle}" added to ${successCount} playlist${successCount > 1 ? 's' : ''}`;
-        } else if (errorCount === 0 && skippedCount > 0) {
-            message = `"${songTitle}" added to ${successCount} playlist${successCount > 1 ? 's' : ''} (${skippedCount} already contained this song)`;
-        } else {
-            message = `"${songTitle}" added to ${successCount} playlist${successCount > 1 ? 's' : ''} (${errorCount} failed${skippedCount > 0 ? `, ${skippedCount} already contained this song` : ''})`;
+        // Log results to console only (TIDAL shows its own "Added to playlist" notification)
+        console.log(`[MultiplePlaylists] Results for "${songTitle}": ${successCount} added, ${errorCount} failed, ${skippedCount} skipped`);
+        
+        // Only show notifications for errors/warnings, let TIDAL handle success notifications
+        if (errorCount > 0) {
+            let message = '';
+            if (skippedCount > 0) {
+                message = `"${songTitle}" added to ${successCount} playlist${successCount > 1 ? 's' : ''} (${errorCount} failed, ${skippedCount} already contained this song)`;
+            } else {
+                message = `"${songTitle}" added to ${successCount} playlist${successCount > 1 ? 's' : ''} (${errorCount} failed)`;
+            }
+            showNotification(message, 'warning');
         }
-        showNotification(message, errorCount === 0 ? 'success' : 'warning');
 
     } catch (error) {
         // Log outer add errors
